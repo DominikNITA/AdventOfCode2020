@@ -9,11 +9,12 @@
 }
 else
 {
-    <h4>Entries:</h4>
+    <h3>Entries:</h3>
     <p class="text-wrap">@String.Join(", ", entries)</p>
 
     <h4>Total entries count: </h4>
     <h4>@entries.Length</h4>
+    <h3>Part One</h3>
     <button @onclick="FindTwoEntriesThatSumTo2020" class="btn btn-success">Calculate</button>
     @if (result != null)
     {
@@ -21,6 +22,17 @@ else
         <p>First Number: @number1</p>
         <p>Second Number: @number2</p>
         <p>Result: @result</p>
+    }
+
+    <h3>Part Two</h3>
+    <button @onclick="FindThreeEntriesThatSumTo2020" class="btn btn-success">Calculate</button>
+    @if (p2_result != null)
+    {
+        <h4>Results:</h4>
+        <p>First Number: @p2_number1</p>
+        <p>Second Number: @p2_number2</p>
+        <p>Third Number: @p2_number3</p>
+        <p>Result: @p2_result</p>
     }
 }
 
@@ -32,12 +44,14 @@ else
     //Result of multiplication of both numbers
     int? result;
 
+    //part two variables
+    int p2_number1, p2_number2, p2_number3;
+    int? p2_result;
+
     protected override async Task OnInitializedAsync()
     {
-
         var result = await Http.GetStringAsync("inputs/day1.txt");
-        entries = result.Split('\n').Select(x => int.Parse(x)).ToArray();
-
+        entries = result.Split('\n').Select(x => int.Parse(x)).OrderBy(n => n).ToArray();
     }
 
     private void FindTwoEntriesThatSumTo2020()
@@ -57,5 +71,24 @@ else
         }
     }
 
-
+    private void FindThreeEntriesThatSumTo2020()
+    {
+        for (int i = 0; i < entries.Length - 1; i++)
+        {
+            for (int j = i; j < entries.Length - 1; j++)
+            {
+                for (int k = j; k < entries.Length - 1; k++)
+                {
+                    if (entries[i] + entries[j] + entries[k] == 2020)
+                    {
+                        p2_number1 = entries[i];
+                        p2_number2 = entries[j];
+                        p2_number3 = entries[k];
+                        p2_result = entries[i] * entries[j] * entries[k];
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
