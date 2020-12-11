@@ -1,0 +1,61 @@
+﻿@page "/day1"
+
+@inject HttpClient Http
+<h2>Day1 - Report Repair</h2>
+
+@if (entries == null)
+{
+    <p>Loading report entries...</p>
+}
+else
+{
+    <h4>Entries:</h4>
+    <p class="text-wrap">@String.Join(", ", entries)</p>
+
+    <h4>Total entries count: </h4>
+    <h4>@entries.Length</h4>
+    <button @onclick="FindTwoEntriesThatSumTo2020" class="btn btn-success">Calculate</button>
+    @if (result != null)
+    {
+        <h4>Results:</h4>
+        <p>First Number: @number1</p>
+        <p>Second Number: @number2</p>
+        <p>Result: @result</p>
+    }
+}
+
+@code {
+    string fileName = "day1.txt";
+    int[] entries;
+    //Two numbers that sum up to 2020
+    int number1, number2;
+    //Result of multiplication of both numbers
+    int? result;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var result = await Http.GetStringAsync("inputs/day1.txt");
+        entries = result.Split('\n').Select(x => int.Parse(x)).ToArray();
+
+    }
+
+    private void FindTwoEntriesThatSumTo2020()
+    {
+        for (int i = 0; i < entries.Length - 1; i++)
+        {
+            for (int j = i; j < entries.Length - 1; j++)
+            {
+                if (entries[i] + entries[j] == 2020)
+                {
+                    number1 = entries[i];
+                    number2 = entries[j];
+                    result = entries[i] * entries[j];
+                    return;
+                }
+            }
+        }
+    }
+
+
+}
