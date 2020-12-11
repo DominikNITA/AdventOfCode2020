@@ -19,6 +19,7 @@ else
     @if (result != null)
     {
         <h4>Results:</h4>
+        <p>Array access count: @arrayAccess</p>
         <p>First Number: @number1</p>
         <p>Second Number: @number2</p>
         <p>Result: @result</p>
@@ -29,6 +30,7 @@ else
     @if (p2_result != null)
     {
         <h4>Results:</h4>
+        <p>Array access count: @p2_arrayAccess</p>
         <p>First Number: @p2_number1</p>
         <p>Second Number: @p2_number2</p>
         <p>Third Number: @p2_number3</p>
@@ -43,15 +45,23 @@ else
     int number1, number2;
     //Result of multiplication of both numbers
     int? result;
+    int arrayAccess = 0;
 
     //part two variables
     int p2_number1, p2_number2, p2_number3;
     int? p2_result;
+    int p2_arrayAccess = 0;
 
     protected override async Task OnInitializedAsync()
     {
         var result = await Http.GetStringAsync("inputs/day1.txt");
-        entries = result.Split('\n').Select(x => int.Parse(x)).OrderBy(n => n).ToArray();
+        entries = result.Split('\n').Select(x =>
+        {
+            if (int.TryParse(x, out int res))
+                return res;
+            else
+                return int.MaxValue;
+        }).Where(n => n < 2020).OrderBy(n => n).ToArray();
     }
 
     private void FindTwoEntriesThatSumTo2020()
@@ -60,6 +70,7 @@ else
         {
             for (int j = i; j < entries.Length - 1; j++)
             {
+                arrayAccess++;
                 if (entries[i] + entries[j] == 2020)
                 {
                     number1 = entries[i];
@@ -79,6 +90,7 @@ else
             {
                 for (int k = j; k < entries.Length - 1; k++)
                 {
+                    p2_arrayAccess++;
                     if (entries[i] + entries[j] + entries[k] == 2020)
                     {
                         p2_number1 = entries[i];

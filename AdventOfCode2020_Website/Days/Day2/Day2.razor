@@ -1,0 +1,27 @@
+﻿@page "/day2"
+@inject HttpClient Http
+
+<h3>Day2 - Password Philosophy</h3>
+<p>Result: @result</p>
+
+@code {
+    int result;
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await Http.GetStringAsync("inputs/day2.txt");
+        result = response.Split('\n').Where(line => IsValidPasswordLine(line)).Count();
+    }
+
+    protected bool IsValidPasswordLine(string line)
+    {
+        //TODO: try regex
+        string[] parts = line.Split(' ');
+        int min = int.Parse(parts[0].Split('-')[0]);
+        int max = int.Parse(parts[0].Split('-')[1]);
+        char searchedLetter = parts[1][0];
+        string password = parts[2];
+
+        int letterOccurences = password.Where(ch => ch == searchedLetter).Count();
+        return letterOccurences >= min && letterOccurences <= max;
+    }
+}
