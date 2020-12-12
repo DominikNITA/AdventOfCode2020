@@ -2,17 +2,21 @@
 @inject HttpClient Http
 
 <h3>Day2 - Password Philosophy</h3>
-<p>Result: @result</p>
+<p>Result(part one): @resultPartOne</p>
+<p>Result(part two): @resultPartTwo</p>
+
 
 @code {
-    int result;
+    int resultPartOne, resultPartTwo;
     protected override async Task OnInitializedAsync()
     {
         var response = await Http.GetStringAsync("inputs/day2.txt");
-        result = response.Split('\n').Where(line => IsValidPasswordLine(line)).Count();
+        resultPartOne = response.Split('\n').Where(line => IsValidPasswordLine_PartOne(line)).Count();
+        string testInput = "1-3 a: abcde\n1-3 b: cdefg\n2-9 c: ccccccccc";
+        resultPartTwo = response.Split('\n').Where(line => IsValidPasswordLine_PartTwo(line)).Count();
     }
 
-    protected bool IsValidPasswordLine(string line)
+    protected bool IsValidPasswordLine_PartOne(string line)
     {
         //TODO: try regex
         string[] parts = line.Split(' ');
@@ -23,5 +27,24 @@
 
         int letterOccurences = password.Where(ch => ch == searchedLetter).Count();
         return letterOccurences >= min && letterOccurences <= max;
+    }
+
+    protected bool IsValidPasswordLine_PartTwo(string line)
+    {
+        //TODO: try regex
+        string[] parts = line.Split(' ');
+        int firstSpot = int.Parse(parts[0].Split('-')[0]) - 1;
+        int secondSpot = int.Parse(parts[0].Split('-')[1]) - 1;
+        char searchedLetter = parts[1][0];
+        string password = parts[2];
+
+        try
+        {
+            return password[firstSpot] == searchedLetter ^ password[secondSpot] == searchedLetter;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
