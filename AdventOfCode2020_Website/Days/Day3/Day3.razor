@@ -1,0 +1,55 @@
+﻿@page "/day3"
+@inject HttpClient Http
+
+<h3>Day3 - Toboggan Trajectory</h3>
+<p>Result(part one): @result</p>
+<p>Result(part two): @p2_result</p>
+
+
+@code {
+    string input;
+    long result;
+    long p2_result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        input = await Http.GetStringAsync("inputs/day3.txt");
+        PartOne(input);
+        PartTwo(input);
+        //string testInput = "1-3 a: abcde\n1-3 b: cdefg\n2-9 c: ccccccccc";
+        //resultPartTwo = response.Split('\n').Where(line => IsValidPasswordLine_PartTwo(line)).Count();
+    }
+
+    protected void PartOne(string input)
+    {
+        var rows = input.Split('\n');
+
+        result = CalculateTrees(rows, 3, 1);
+    }
+
+    protected void PartTwo(string input)
+    {
+        var rows = input.Split('\n');
+        p2_result = CalculateTrees(rows, 1, 1) * CalculateTrees(rows, 3, 1) * CalculateTrees(rows, 5, 1) * CalculateTrees(rows, 7, 1) * CalculateTrees(rows, 1, 2);
+    }
+
+    long CalculateTrees(string[] rows, int dx, int dy)
+    {
+        int width = rows[0].Length - 1;
+        long treeCounter = 0;
+        int x = 0;
+        int y = 0;
+        char treeSquareChar = '#';
+
+        for (int i = 0; y < rows.Length; i++)
+        {
+            if (rows[y][x % width] == treeSquareChar)
+            {
+                treeCounter++;
+            }
+            x += dx;
+            y += dy;
+        }
+        return treeCounter;
+    }
+}
