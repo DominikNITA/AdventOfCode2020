@@ -1,0 +1,58 @@
+﻿@page "/day4"
+@inject HttpClient Http
+
+<h3>Day 4 - Passport Processing</h3>
+<p>Result(part one): @result</p>
+<p>Result(part two): @p2_result</p>
+
+
+@code {
+        string input;
+        int result;
+        int p2_result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        input = await Http.GetStringAsync("inputs/day4.txt");
+        PartOne(input);
+        PartTwo(input);
+    }
+
+    protected void PartOne(string input)
+    {
+        var passports = input.Split("\n\n");
+
+        result = CheckPasswords_PartOne(passports);
+    }
+
+    protected void PartTwo(string input)
+    {
+        var passports = input.Split("\n\n");
+
+        //p2_result = CheckPasswords_PartTwo(passports);
+    }
+
+    int CheckPasswords_PartOne(string[] passports)
+    {
+        int validPassportCount = 0;
+        string[] requiredFields = new string[] { "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid" };
+
+        foreach (var passport in passports)
+        {
+            var tags = passport.Split(' ', '\n').Select(x => x.Split(':')[0]);
+            foreach (var requiredField in requiredFields)
+            {
+                if (!tags.Contains(requiredField))
+                {
+                    validPassportCount--;
+                    break;
+                }
+            }
+            validPassportCount++;
+        }
+
+        return validPassportCount;
+    }
+
+
+}
