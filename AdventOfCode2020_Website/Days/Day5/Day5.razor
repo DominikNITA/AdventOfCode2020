@@ -31,6 +31,12 @@
 
     protected void PartTwo(string input)
     {
+        var boardingPasses = input.Split("\n");
+        var seatIDs = boardingPasses.Select(bp => CalculateSeatId(
+            ParseSeatFragmentData(bp.Substring(0, 7), 0, 127, 'F', 'B'),
+            ParseSeatFragmentData(bp.Substring(7, 3), 0, 7, 'L', 'R')
+            )).OrderBy(x => x).ToHashSet();
+        p2_result = seatIDs.First(id => !seatIDs.Contains(id + 1)) + 1;
     }
 
     int ParseSeatFragmentData(string data, int min, int max, char lowerChar, char higherChar)
