@@ -1,0 +1,61 @@
+﻿@page "/day5"
+@inject HttpClient Http
+@using System.Text.RegularExpressions
+
+<h3>Day 5 - Binary Boarding</h3>
+<h4>Part One</h4>
+<p>Result: @result</p>
+<h4>Part Two</h4>
+<p>Result: @p2_result</p>
+
+@code {
+    string input;
+    int result;
+    int p2_result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        input = await Http.GetStringAsync("inputs/day5.txt");
+        PartOne(input);
+        PartTwo(input);
+    }
+
+    protected void PartOne(string input)
+    {
+        var boardingPasses = input.Split("\n");
+        result = boardingPasses.Select(bp => CalculateSeatId(
+            ParseSeatFragmentData(bp.Substring(0, 7), 0, 127, 'F', 'B'),
+            ParseSeatFragmentData(bp.Substring(7, 3), 0, 7, 'L', 'R')
+            )).Max();
+    }
+
+    protected void PartTwo(string input)
+    {
+    }
+
+    int ParseSeatFragmentData(string data, int min, int max, char lowerChar, char higherChar)
+    {
+        if (data == "")
+        {
+            return min;
+        }
+        char currentDiviser = data[0];
+        if (currentDiviser == lowerChar)
+        {
+            return ParseSeatFragmentData(data.Remove(0, 1), min, (min + max) / 2, lowerChar, higherChar);
+        }
+        else if (currentDiviser == higherChar)
+        {
+            return ParseSeatFragmentData(data.Remove(0, 1), (min + max + 1) / 2, max, lowerChar, higherChar);
+        }
+        else
+        {
+            throw new ArgumentException();
+        }
+    }
+
+    int CalculateSeatId(int row, int column)
+    {
+        return row * 8 + column;
+    }
+}
