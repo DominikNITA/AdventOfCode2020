@@ -50,12 +50,13 @@
 
     protected void PartTwo(string input)
     {
+        string[] groups = input.Split("\n\n");
 
+        var possibleresponses = Enumerable.Range('a', 'z' - 'a' + 1).Select(i => (Char)i).ToList();
+
+        p2_result = groups.Select(group =>
+        group.Split('\n')
+        .Aggregate(possibleresponses, (sum, next) => sum = sum.Intersect(next.Select(res => res)).ToList()) //Intersect method + initial seed changed to all possible responses
+        ).Sum(x => x.Count);
     }
-
-    string[] GetGroupsFromInput(string input)
-    {
-        return input.Split("\n\n");
-    }
-
 }
