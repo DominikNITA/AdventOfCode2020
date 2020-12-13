@@ -1,0 +1,61 @@
+﻿@page "/day6"
+@inject HttpClient Http
+@using System.Text.RegularExpressions
+
+<h3>Day 6 - Custom Customs</h3>
+<p>Input line ending format had to be changed from CRLF TO LF</p>
+<h4>Part One</h4>
+<p>Result: @result</p>
+<h4>Part Two</h4>
+<p>Result: @p2_result</p>
+
+@code {
+    string input;
+    int result;
+    int p2_result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        input = await Http.GetStringAsync("inputs/day6.txt");
+        PartOne(input);
+        PartTwo(input);
+    }
+
+    protected void PartOne(string input)
+    {
+        string[] groups = input.Split("\n\n");
+
+        result = groups.Select(group =>
+            group.Split('\n')
+            .Aggregate(new List<char>(), (sum, next) => sum = sum.Union(next.Select(res => res)).ToList()) //Union automatically removes doubles from the dataset
+            ).Sum(x => x.Count);
+
+@*                First version without LINQ
+            int accumulator = 0;
+            foreach (var group in groups)
+            {
+                var answers = group.Split('\n');
+                HashSet<char> checkedResponses = new HashSet<char>();
+                foreach (var answer in answers)
+                {
+                    foreach (var response in answer)
+                    {
+                        checkedResponses.Add(response);
+                    }
+                }
+                accumulator += checkedResponses.Count;
+            }
+            result = accumulator;*@
+    }
+
+    protected void PartTwo(string input)
+    {
+
+    }
+
+    string[] GetGroupsFromInput(string input)
+    {
+        return input.Split("\n\n");
+    }
+
+}
