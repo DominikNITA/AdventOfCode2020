@@ -23,57 +23,51 @@
     protected void PartOne(string input)
     {
         var ruleStrings = input.Split('\n');
-        List<string> checkedBags = new List<string>();
         List<Rule> rules = new List<Rule>();
+        Regex containedRuleRegex = new Regex(@"^[ ]?(?<quantity>[0-9]) (?<name>[\w]+ [\w]+) bag[s]?$");
         foreach (var ruleString in ruleStrings)
         {
             var parts = ruleString.Split(" bags contain ");
             var containedRules = new Dictionary<string, int>();
-            if(!parts[1].Contains("no other bags."))
+            var containedRulesStrings = parts[1];
+            //Note: Strange behavior of Remove method: -1 should remove the last character but only -2 is working :(
+            containedRulesStrings = containedRulesStrings.Remove(containedRulesStrings.Length - 2);
+            var containedRulesArray = containedRulesStrings.Split(',');
+            foreach (var rule in containedRulesArray)
             {
-                var containedRulesStrings = parts[1];
-                containedRulesStrings = containedRulesStrings.Remove(containedRulesStrings.Length - 1);
-                var containedRulesArray = containedRulesStrings.Split(',').Select(x => x.Trim());
-                foreach (var rule in containedRulesArray)
+                var match = containedRuleRegex.Match(rule);
+                if (match.Success)
                 {
-                    int spaceIndex = rule.IndexOf(' ');
-                    containedRules.Add(rule.Substring(spaceIndex + 1).Replace(" bags",), int.Parse(rule.Substring(0,spaceIndex)));
+                    containedRules.Add(match.Groups["name"].Value, int.Parse(match.Groups["quantity"].Value));
                 }
             }
-            rules.Add(new Rule() { Name = parts[0], ContainedRules=containedRules });
+            rules.Add(new Rule() { Name = parts[0], ContainedRules = containedRules });
         }
-        result = GetResult(new List<string>() { "shiny gold" }, rules, new List<string>());
+        result = GetResult(new List<string>() { "shiny gold" }, rules);
     }
 
-    int GetResult(List<string> bagsToCheck,List<Rule> rules,List<string> checkedBags)
+    int GetResult(List<string> bagsToCheck, List<Rule> rules, List<string> checkedBags = null)
     {
+        checkedBags ??= new List<string>();
         List<string> nextBags = new List<string>();
-        Console.WriteLine("Bags to check: " + String.Join(',',bagsToCheck));
-        Console.WriteLine("Checked bags: " + String.Join(',', checkedBags));
-        Console.WriteLine("Rules: " + String.Join(',', rules.Select(rule => rule.Name).ToArray()));
+
         foreach (var rule in rules)
         {
-            Console.WriteLine(String.Join(',',rule.ContainedRules.Keys));
-            if(!checkedBags.Contains(rule.Name) && rule.ContainedRules.Keys.Any(key => bagsToCheck.Contains(key)))
+            if (!checkedBags.Contains(rule.Name) //If rule has not been checked before
+                && rule.ContainedRules.Keys.Any(key => bagsToCheck.Contains(key)))
             {
                 nextBags.Add(rule.Name);
                 checkedBags.Add(rule.Name);
             }
         }
-        if(nextBags.Count == 0)
-        {
-            return checkedBags.Count;
-        }
-        else
-        {
-            return GetResult(nextBags, rules, checkedBags);
-        }
+
+        return nextBags.Count == 0 ? checkedBags.Count : GetResult(nextBags, rules, checkedBags);
     }
 
     private class Rule
     {
         public string Name { get; set; }
-        public Dictionary<string,int> ContainedRules { get; set; }
+        public Dictionary<string, int> ContainedRules { get; set; }
     }
 
     protected void PartTwo(string input)
