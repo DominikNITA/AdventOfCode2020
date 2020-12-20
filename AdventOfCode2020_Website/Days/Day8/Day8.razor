@@ -1,0 +1,87 @@
+﻿@page "/day8"
+@inject HttpClient Http
+@using System.Text.RegularExpressions
+
+<h3>Day 7 - Handheld Halting</h3>
+<h4>Part One</h4>
+<p>Result: @result</p>
+<h4>Part Two</h4>
+<p>Result: @p2_result</p>
+
+@code {
+    string input;
+    int result;
+    int p2_result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        input = await Http.GetStringAsync("inputs/day8.txt");
+        PartOne(input);
+        PartTwo(input);
+    }
+
+    enum InstructionType { ACC, JMP, NOP }
+    record Instruction
+    {
+        public InstructionType Type { get; set; }
+        public int Argument { get; set; }
+        public Instruction(string type, int argument)
+        {
+            Type = type switch
+            {
+                "acc" => InstructionType.ACC,
+                "jmp" => InstructionType.JMP,
+                "nop" => InstructionType.NOP,
+                _ => throw new ArgumentException("Invalid instruction string: " + type)
+            };
+            Argument = argument;
+        }
+    }
+
+    protected void PartOne(string input)
+    {
+        var instructions = ParseInstructions(input);
+
+        result = GetAccumulatorBeforeInfiniteLoop(instructions, 0);
+    }
+
+    List<Instruction> ParseInstructions(string input)
+    {
+        var inputStrings = input.Split('\n');
+        Regex instructionRegex = new Regex(@"(?<instruction>acc|jmp|nop) (?<argument>[-|+][0-9]+)");
+        List<Instruction> instructions = new List<Instruction>();
+        foreach (var str in inputStrings)
+        {
+            var match = instructionRegex.Match(str);
+            if (!match.Success) continue;
+            instructions.Add(new Instruction(match.Groups["instruction"].Value, int.Parse(match.Groups["argument"].Value)));
+        }
+
+        return instructions;
+    }
+
+    int GetAccumulatorBeforeInfiniteLoop(List<Instruction> instructionsBlock, int currentInstructionPosition = 0, List<int> oldInstructions = null, int accumulator = 0)
+    {
+        oldInstructions ??= new List<int>();
+        if (oldInstructions.Contains(currentInstructionPosition)) return accumulator;
+        oldInstructions.Add(currentInstructionPosition);
+        var currentInstruction = instructionsBlock[currentInstructionPosition];
+        return currentInstruction.Type switch
+        {
+            InstructionType.ACC => GetAccumulatorBeforeInfiniteLoop(instructionsBlock, currentInstructionPosition + 1, oldInstructions, accumulator + currentInstruction.Argument),
+            InstructionType.JMP => GetAccumulatorBeforeInfiniteLoop(instructionsBlock, currentInstructionPosition + currentInstruction.Argument, oldInstructions, accumulator),
+            InstructionType.NOP => GetAccumulatorBeforeInfiniteLoop(instructionsBlock, currentInstructionPosition + 1, oldInstructions, accumulator),
+            _ => throw new ArgumentException("Invalid instruction type!")
+        };
+    }
+
+
+
+    protected void PartTwo(string input)
+    {
+        //var rules = GetRulesFromStrings(input.Split('\n'));
+
+        //p2_result = GetAmountOfBagsContainedInsideGivenBag(rules, "shiny gold");
+    }
+
+}

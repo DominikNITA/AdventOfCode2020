@@ -88,15 +88,7 @@
 
     int GetAmountOfBagsContainedInsideGivenBag(List<Rule> rules, string bagName)
     {
-        Rule bagRule;
-        bagRule = rules.FirstOrDefault(rule => rule.Name == bagName);
-        if(bagRule == null)
-        {
-            return 0;
-        }
-        else
-        {
-            return bagRule.ContainedRules.Aggregate(0, (sum, next) => sum + next.Value + next.Value * GetAmountOfBagsContainedInsideGivenBag(rules, next.Key));
-        }
+        Rule bagRule = rules.FirstOrDefault(rule => rule.Name == bagName);
+        return bagRule == null ? 0 : bagRule.ContainedRules.Aggregate(0, (sum, next) => sum + next.Value + next.Value * GetAmountOfBagsContainedInsideGivenBag(rules, next.Key));
     }
 }
