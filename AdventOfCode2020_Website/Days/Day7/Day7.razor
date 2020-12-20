@@ -22,7 +22,13 @@
 
     protected void PartOne(string input)
     {
-        var ruleStrings = input.Split('\n');
+        var rules = GetRulesFromStrings(input.Split('\n'));
+
+        result = GetAmountBagsContainingGivenBag(new List<string>() { "shiny gold" }, rules);
+    }
+
+    List<Rule> GetRulesFromStrings(string[] ruleStrings)
+    {
         List<Rule> rules = new List<Rule>();
         Regex containedRuleRegex = new Regex(@"^[ ]?(?<quantity>[0-9]) (?<name>[\w]+ [\w]+) bag[s]?$");
         foreach (var ruleString in ruleStrings)
@@ -41,12 +47,15 @@
                     containedRules.Add(match.Groups["name"].Value, int.Parse(match.Groups["quantity"].Value));
                 }
             }
-            rules.Add(new Rule() { Name = parts[0], ContainedRules = containedRules });
+            if(containedRules.Count > 0)
+            {
+                rules.Add(new Rule() { Name = parts[0], ContainedRules = containedRules });
+            }
         }
-        result = GetResult(new List<string>() { "shiny gold" }, rules);
+        return rules;
     }
 
-    int GetResult(List<string> bagsToCheck, List<Rule> rules, List<string> checkedBags = null)
+    int GetAmountBagsContainingGivenBag(List<string> bagsToLookFor, List<Rule> rules, List<string> checkedBags = null)
     {
         checkedBags ??= new List<string>();
         List<string> nextBags = new List<string>();
@@ -54,14 +63,14 @@
         foreach (var rule in rules)
         {
             if (!checkedBags.Contains(rule.Name) //If rule has not been checked before
-                && rule.ContainedRules.Keys.Any(key => bagsToCheck.Contains(key)))
+                && rule.ContainedRules.Keys.Any(key => bagsToLookFor.Contains(key)))
             {
                 nextBags.Add(rule.Name);
                 checkedBags.Add(rule.Name);
             }
         }
 
-        return nextBags.Count == 0 ? checkedBags.Count : GetResult(nextBags, rules, checkedBags);
+        return nextBags.Count == 0 ? checkedBags.Count : GetAmountBagsContainingGivenBag(nextBags, rules, checkedBags);
     }
 
     private class Rule
@@ -72,6 +81,22 @@
 
     protected void PartTwo(string input)
     {
+        var rules = GetRulesFromStrings(input.Split('\n'));
 
+        p2_result = GetAmountOfBagsContainedInsideGivenBag(rules, "shiny gold");
+    }
+
+    int GetAmountOfBagsContainedInsideGivenBag(List<Rule> rules, string bagName)
+    {
+        Rule bagRule;
+        bagRule = rules.FirstOrDefault(rule => rule.Name == bagName);
+        if(bagRule == null)
+        {
+            return 0;
+        }
+        else
+        {
+            return bagRule.ContainedRules.Aggregate(0, (sum, next) => sum + next.Value + next.Value * GetAmountOfBagsContainedInsideGivenBag(rules, next.Key));
+        }
     }
 }
