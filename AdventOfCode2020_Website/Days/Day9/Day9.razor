@@ -1,0 +1,88 @@
+﻿@page "/day9"
+@inject HttpClient Http
+@using System.Linq
+@using System.Text.RegularExpressions
+
+<h3>Day 9 - Encoding Error</h3>
+<h4>Part One</h4>
+<p>Result: @result</p>
+<h4>Part Two</h4>
+<p>Result: @p2_result</p>
+
+@code {
+        string input;
+        long result;
+        long p2_result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        input = await Http.GetStringAsync("inputs/day9.txt");
+        PartOne(input);
+        PartTwo(input);
+    }
+
+    long[] ParseNumbers(string input)
+    {
+        return input.Split("\n").Select(str => long.Parse(str)).ToArray();
+    }
+
+    protected void PartOne(string input)
+    {
+        var numbers = ParseNumbers(input);
+
+        result = GetFirstNotComplyingNumber(numbers, 25);
+    }
+
+
+    long GetFirstNotComplyingNumber(long[] numbers, int preambuleSize)
+    {
+        for (int i = preambuleSize; i < numbers.Length; i++)
+        {
+            if (!IsNumberSumOfTwoNumbersFromArray(numbers[i], numbers.Skip(i - preambuleSize).Take(preambuleSize).ToArray()))
+                return numbers[i];
+        }
+        return -1;
+    }
+
+    bool IsNumberSumOfTwoNumbersFromArray(long number, long[] numbers)
+    {
+        numbers = numbers.Where(n => number > n).OrderBy(n => n).ToArray();
+        for (int i = 0; i < numbers.Length - 1; i++)
+        {
+            for (int j = i + 1; j < numbers.Length; j++)
+            {
+                if (numbers[i] + numbers[j] == number)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    protected void PartTwo(string input)
+    {
+        var numbers = ParseNumbers(input);
+
+        p2_result = GetResultFromContiguousSet(numbers, 14144619);
+    }
+
+    long GetResultFromContiguousSet(long[] numbers, long invalidNumber)
+    {
+        for (int i = 0; i < numbers.Length - 1; i++)
+        {
+            long acc = numbers[i];
+            for (int j = i + 1; j < numbers.Length; j++)
+            {
+                acc += numbers[j];
+                if (acc == invalidNumber)
+                {
+                    return numbers.Skip(i).Take(j - i + 1).ToArray().Min() + numbers.Skip(i).Take(j - i + 1).ToArray().Max();
+                }
+                if (acc > invalidNumber)
+                {
+                    break;
+                }
+            }
+        }
+        return -1;
+    }
+}
