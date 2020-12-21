@@ -1,0 +1,69 @@
+﻿@page "/day10"
+@inject HttpClient Http
+@using System.Linq
+@using System.Text.RegularExpressions
+
+<h3>Day 10 - Adapter Array</h3>
+<h4>Part One</h4>
+<p>Result: @result</p>
+<h4>Part Two</h4>
+<p>Result: @p2_result</p>
+
+@code {
+    string input;
+    int result;
+    long p2_result;
+
+    protected override async Task OnInitializedAsync()
+    {
+        input = await Http.GetStringAsync("inputs/day10.txt");
+        PartOne(input);
+        PartTwo(input);
+    }
+
+    int[] ParseNumbers(string input)
+    {
+        return input.Split("\n").Select(str => int.Parse(str)).ToArray();
+    }
+
+    protected void PartOne(string input)
+    {
+        var numbers = ParseNumbers(input).OrderBy(n=>n).ToList();
+        numbers.Add(numbers.Last() + 3);
+
+        result = numbers.Aggregate((new int[3],0), (counter, next) => {
+            counter.Item1[next - counter.Item2 - 1] += 1;
+            return (counter.Item1, next);
+        }, counter => counter.Item1[0] * counter.Item1[2]);
+    }
+
+
+
+    protected void PartTwo(string input)
+    {
+        //var numbers = ParseNumbers(input);
+
+        //p2_result = GetResultFromContiguousSet(numbers, 14144619);
+    }
+
+    long GetResultFromContiguousSet(long[] numbers, long invalidNumber)
+    {
+        for (int i = 0; i < numbers.Length - 1; i++)
+        {
+            long acc = numbers[i];
+            for (int j = i + 1; j < numbers.Length; j++)
+            {
+                acc += numbers[j];
+                if (acc == invalidNumber)
+                {
+                    return numbers.Skip(i).Take(j - i + 1).ToArray().Min() + numbers.Skip(i).Take(j - i + 1).ToArray().Max();
+                }
+                if (acc > invalidNumber)
+                {
+                    break;
+                }
+            }
+        }
+        return -1;
+    }
+}
