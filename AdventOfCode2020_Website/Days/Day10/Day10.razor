@@ -45,25 +45,4 @@
 
         //p2_result = GetResultFromContiguousSet(numbers, 14144619);
     }
-
-    long GetResultFromContiguousSet(long[] numbers, long invalidNumber)
-    {
-        for (int i = 0; i < numbers.Length - 1; i++)
-        {
-            long acc = numbers[i];
-            for (int j = i + 1; j < numbers.Length; j++)
-            {
-                acc += numbers[j];
-                if (acc == invalidNumber)
-                {
-                    return numbers.Skip(i).Take(j - i + 1).ToArray().Min() + numbers.Skip(i).Take(j - i + 1).ToArray().Max();
-                }
-                if (acc > invalidNumber)
-                {
-                    break;
-                }
-            }
-        }
-        return -1;
-    }
 }
